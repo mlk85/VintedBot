@@ -1,7 +1,7 @@
 import time
 from pyVinted import Vinted
 
-VINTED_ENDPOINT = "https://www.vinted.pl/catalog?search_text=nike&catalog[]=2050&page=1&order=newest_first"
+VINTED_ENDPOINT = "https://www.vinted.pl/catalog?search_text=adidas&order=newest_first&page=1"
 vinted = Vinted()
 
 def fetch_items(url):
@@ -11,7 +11,7 @@ def fetch_items(url):
     :return:
     """
     response = vinted.items.search(url)
-    item_data = {item.id: [item.title, item.price, item.url] for item in response}
+    item_data = {item.id: [item.title, item.price, item.url, item.isNewItem()] for item in response}
     return item_data
 
 def dump_to_file(data, filename: str = "clothes.txt"):
@@ -29,6 +29,7 @@ def dump_to_file(data, filename: str = "clothes.txt"):
 def compare_data(old_dict, new_dict):
     """
     Checks if any new item was added by comparing new dict keys with old dict keys
+    and if these items are actually new
     :param old_dict:
     :param new_dict:
     :return:
@@ -38,7 +39,7 @@ def compare_data(old_dict, new_dict):
         print("Looking for items...")
         return new_items
     for position in new_dict:
-        if str(position) not in old_dict:
+        if str(position) not in old_dict and new_dict[position][3]:
             new_items[position] = new_dict[position]
     return new_items
 
@@ -51,7 +52,8 @@ def print_new_items(new_item_list):
             print(f"{key}: {item[0]}: {item[1]} PLN ,{item[2]}")
 
 if __name__ == "__main__":
-    open("clothes.txt", "w").close()
+    with open("clothes.txt", "w")as createFile:
+        createFile.write("")
 
     while True:
         with open("clothes.txt", "r") as f:
